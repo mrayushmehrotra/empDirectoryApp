@@ -9,7 +9,7 @@ class JWTService {
     static generateTokenForUser(user) {
         const payload = {
             id: user === null || user === void 0 ? void 0 : user.id,
-            email: user === null || user === void 0 ? void 0 : user.email,
+            name: user === null || user === void 0 ? void 0 : user.name,
         };
         const token = jsonwebtoken_1.default.sign(payload, JWT_SECRET);
         return token;

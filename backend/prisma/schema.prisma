@@ -23,7 +23,7 @@ model Department {
 
 model Employee {
     id           String     @id @default(auto()) @map("_id") @db.ObjectId
-    name         String
+    name         String //name will be unqiue like some username 
     position     String
     salary       Int
     department   Department @relation(fields: [departmentId], references: [id])

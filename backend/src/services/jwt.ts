@@ -1,4 +1,4 @@
-import { Employee } from "@prisma/client";
+import { Employee } from "../generated/prisma";
 
 import JWT from "jsonwebtoken";
 import { JWTUser } from "../interfaces";
@@ -8,7 +8,7 @@ class JWTService {
   public static generateTokenForUser(user: Employee) {
     const payload: JWTUser = {
       id: user?.id,
-      email: user?.email,
+      name: user?.name,
     };
     const token = JWT.sign(payload, JWT_SECRET);
     return token;
