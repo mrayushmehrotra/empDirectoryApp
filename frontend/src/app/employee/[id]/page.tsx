@@ -1,28 +1,38 @@
 "use client";
 import { useRouter } from "next/navigation";
 import { useQuery } from "@apollo/client";
-import { gql } from "@apollo/client";
+import { GET_EMPLOYEE_BY_ID } from "../../../../graphql/query/employee";
 
-const GET_EMPLOYEE = gql`
-  query GetEmployeeDetails($id: ID!) {
-    getEmployeeDetails(id: $id) {
-      id
-      name
-      position
-      salary
-      department
-      departmentId
-    }
-  }
-`;
-
-export default function EmployeeDetailPage({ params }: { params: { id: string } }) {
+export default function EmployeeDetailPage({
+  params,
+}: {
+  params: { id: string };
+}) {
   const router = useRouter();
-  const { data, loading, error } = useQuery(GET_EMPLOYEE, { variables: { id: params.id } });
+  const { data, loading, error } = useQuery(GET_EMPLOYEE_BY_ID, {
+    variables: { id: params.id },
+  });
 
-  if (loading) return <div className="flex items-center justify-center h-screen"><span className="text-lg font-semibold animate-pulse">Loading...</span></div>;
-  if (error) return <div className="flex items-center justify-center h-screen"><span className="text-red-500 font-semibold">Error: {error.message}</span></div>;
-  if (!data?.getEmployeeDetails) return <div className="flex items-center justify-center h-screen"><span className="text-gray-500">Employee not found.</span></div>;
+  if (loading)
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <span className="text-lg font-semibold animate-pulse">Loading...</span>
+      </div>
+    );
+  if (error)
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <span className="text-red-500 font-semibold">
+          Error: {error.message}
+        </span>
+      </div>
+    );
+  if (!data?.getEmployeeDetails)
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <span className="text-gray-500">Employee not found.</span>
+      </div>
+    );
 
   const emp = data.getEmployeeDetails;
 
@@ -35,15 +45,28 @@ export default function EmployeeDetailPage({ params }: { params: { id: string } 
         >
           &larr; Back to Home
         </button>
-        <h1 className="text-2xl font-bold text-blue-700 mb-4">Employee Details</h1>
+        <h1 className="text-2xl font-bold text-blue-700 mb-4">
+          Employee Details
+        </h1>
         <div className="space-y-3">
-          <div><span className="font-semibold">Name:</span> {emp.name}</div>
-          <div><span className="font-semibold">Position:</span> {emp.position}</div>
-          <div><span className="font-semibold">Department:</span> {emp.department}</div>
-          <div><span className="font-semibold">Salary:</span> ${emp.salary}</div>
-          <div><span className="font-semibold">ID:</span> {emp.id}</div>
+          <div>
+            <span className="font-semibold">Name:</span> {emp.name}
+          </div>
+          <div>
+            <span className="font-semibold">Position:</span> {emp.position}
+          </div>
+          <div>
+            <span className="font-semibold">Department:</span> {emp.department}
+          </div>
+          <div>
+            <span className="font-semibold">Salary:</span> ${emp.salary}
+          </div>
+          <div>
+            <span className="font-semibold">ID:</span> {emp.id}
+          </div>
         </div>
       </div>
     </div>
   );
 }
+
