@@ -28,8 +28,8 @@ export default function AddEmployeePage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!validate()) return;
-    // Transform name: replace spaces with underscores
-    const transformedName = form.name.replace(/\s+/g, "_");
+    // Transform name: replace all spaces (including multiple) with a single underscore, trim underscores
+    const transformedName = form.name.trim().replace(/\s+/g, "_");
     await createEmployee({
       variables: { input: { ...form, name: transformedName, salary: Number(form.salary) } },
       onCompleted: () => router.push("/")
