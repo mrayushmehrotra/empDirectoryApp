@@ -17,12 +17,8 @@ const express_1 = __importDefault(require("express"));
 const server_1 = require("@apollo/server");
 const express4_1 = require("@apollo/server/express4");
 const cors_1 = __importDefault(require("cors"));
-const jwt_1 = __importDefault(require("../services/jwt"));
 const schema_1 = require("./graphql/schema");
-const getAllEmployee_1 = require("./controller/getAllEmployee");
-const createEmployee_1 = require("./controller/createEmployee");
-const getEmployeeDetails_1 = require("./controller/getEmployeeDetails");
-const getEmployeesByDepartment_1 = require("./controller/getEmployeesByDepartment");
+const employee_1 = require("./controller/employee");
 function initServer() {
     return __awaiter(this, void 0, void 0, function* () {
         const app = (0, express_1.default)();
@@ -32,25 +28,17 @@ function initServer() {
             typeDefs: schema_1.schema,
             resolvers: {
                 Query: {
-                    Employee: getAllEmployee_1.getAllEmp,
-                    getEmployeeDetails: getEmployeeDetails_1.getEmployeeDetails,
-                    getEmployeesByDepartment: getEmployeesByDepartment_1.getEmployeesByDepartment,
+                    Employee: employee_1.getAllEmp,
+                    getEmployeeDetails: employee_1.getEmployeeDetails,
+                    getEmployeesByDepartment: employee_1.getEmployeesByDepartment,
                 },
                 Mutation: {
-                    createEmployee: createEmployee_1.createEmployee,
+                    createEmployee: employee_1.createEmployee,
                 },
             },
         });
         yield graphqlServer.start();
-        app.use("/graphql", (0, express4_1.expressMiddleware)(graphqlServer, {
-            context: (_a) => __awaiter(this, [_a], void 0, function* ({ req, res }) {
-                return {
-                    user: req.headers.authorization
-                        ? jwt_1.default.decodeToken(req.headers.authorization.split("Bearer")[1])
-                        : undefined,
-                };
-            }),
-        }));
+        app.use("/graphql", (0, express4_1.expressMiddleware)(graphqlServer));
         return app;
     });
 }

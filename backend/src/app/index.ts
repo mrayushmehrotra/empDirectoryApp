@@ -3,12 +3,14 @@ import { ApolloServer } from "@apollo/server";
 import { expressMiddleware } from "@apollo/server/express4";
 
 import cors from "cors";
-import JWTService from "../services/jwt";
+
 import { schema } from "./graphql/schema";
-import { getAllEmp } from "./controller/getAllEmployee";
-import { createEmployee } from "./controller/createEmployee";
-import { getEmployeeDetails } from "./controller/getEmployeeDetails";
-import { getEmployeesByDepartment } from "./controller/getEmployeesByDepartment";
+import {
+  getEmployeeDetails,
+  getEmployeesByDepartment,
+  getAllEmp,
+  createEmployee,
+} from "./controller/employee";
 
 export async function initServer() {
   const app = express();
@@ -33,19 +35,6 @@ export async function initServer() {
 
   await graphqlServer.start();
 
-  app.use(
-    "/graphql",
-    expressMiddleware(graphqlServer, {
-      context: async ({ req, res }) => {
-        return {
-          user: req.headers.authorization
-            ? JWTService.decodeToken(
-                req.headers.authorization.split("Bearer")[1],
-              )
-            : undefined,
-        };
-      },
-    }),
-  );
+  app.use("/graphql", expressMiddleware(graphqlServer));
   return app;
 }
