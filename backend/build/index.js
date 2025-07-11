@@ -44,7 +44,10 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 const app_1 = require("./app");
 const dotenv = __importStar(require("dotenv"));
+const dbConnection_1 = require("./db/dbConnection");
 dotenv.config();
+const DB_URI = process.env.DATABASE_URL;
+(0, dbConnection_1.connectDB)(DB_URI);
 function init() {
     return __awaiter(this, void 0, void 0, function* () {
         const app = yield (0, app_1.initServer)();
