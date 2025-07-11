@@ -7,6 +7,8 @@ import JWTService from "../services/jwt";
 import { schema } from "./graphql/schema";
 import { getAllEmp } from "./controller/getAllEmployee";
 import { createEmployee } from "./controller/createEmployee";
+import { getEmployeeDetails } from "./controller/getEmployeeDetails";
+import { getEmployeesByDepartment } from "./controller/getEmployeesByDepartment";
 
 export async function initServer() {
   const app = express();
@@ -20,6 +22,8 @@ export async function initServer() {
     resolvers: {
       Query: {
         Employee: getAllEmp,
+        getEmployeeDetails,
+        getEmployeesByDepartment,
       },
       Mutation: {
         createEmployee,

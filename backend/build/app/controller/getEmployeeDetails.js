@@ -9,32 +9,22 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.createEmployee = void 0;
+exports.getEmployeeDetails = void 0;
 const dbOperations_1 = require("../../db/dbOperations");
 const employeeValidation_1 = require("../../validations/employeeValidation");
-const createEmployee = (_1, _a) => __awaiter(void 0, [_1, _a], void 0, function* (_, { input }) {
+const getEmployeeDetails = (_1, _a) => __awaiter(void 0, [_1, _a], void 0, function* (_, { id }) {
     try {
-        // Validate input with Zod
-        const validationResult = employeeValidation_1.createEmployeeInputSchema.safeParse({ input });
-        if (!validationResult.success) {
-            const errors = (0, employeeValidation_1.formatZodError)(validationResult.error);
-            throw new Error(`Validation failed: error`);
+        // Validate ID input
+        const validation = employeeValidation_1.idSchema.safeParse({ id });
+        if (!validation.success) {
+            const errors = (0, employeeValidation_1.formatZodError)(validation.error);
+            throw new Error(`Invalid ID: ${errors}`);
         }
-        const validatedInput = validationResult.data.input;
         const Employee = (0, dbOperations_1.getEmployee)();
-        // Check if employee name already exists
-        const existingEmployee = yield Employee.findByName(validatedInput.name);
-        if (existingEmployee) {
-            throw new Error(`Employee with name '${validatedInput.name}' already exists, name must be unique`);
+        const employee = yield Employee.findById(id);
+        if (!employee) {
+            throw new Error(`Employee with ID '${id}' not found`);
         }
-        // Create the employee with the department enum value
-        const employee = yield Employee.create({
-            name: validatedInput.name,
-            position: validatedInput.position,
-            salary: validatedInput.salary,
-            department: validatedInput.department
-        });
-        // Return the employee
         return {
             id: employee._id,
             name: employee.name,
@@ -46,7 +36,7 @@ const createEmployee = (_1, _a) => __awaiter(void 0, [_1, _a], void 0, function*
     }
     catch (error) {
         const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
-        throw new Error(`Failed to create employee: ${errorMessage}`);
+        throw new Error(`Failed to get employee details: ${errorMessage}`);
     }
 });
-exports.createEmployee = createEmployee;
+exports.getEmployeeDetails = getEmployeeDetails;

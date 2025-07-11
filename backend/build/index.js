@@ -47,13 +47,23 @@ const dotenv = __importStar(require("dotenv"));
 const dbConnection_1 = require("./db/dbConnection");
 dotenv.config();
 const DB_URI = process.env.DATABASE_URL;
-(0, dbConnection_1.connectDB)(DB_URI);
 function init() {
     return __awaiter(this, void 0, void 0, function* () {
-        const app = yield (0, app_1.initServer)();
-        app.listen(8000, () => {
-            console.log("Server is on 8000");
-        });
+        try {
+            // Connect to database first
+            console.log("🔌 Connecting to database...");
+            yield (0, dbConnection_1.connectDB)(DB_URI);
+            console.log("✅ Database connected successfully");
+            // Initialize server after database connection
+            const app = yield (0, app_1.initServer)();
+            app.listen(8000, () => {
+                console.log("Server is on 8000");
+            });
+        }
+        catch (error) {
+            console.error("❌ Failed to initialize application:", error);
+            process.exit(1);
+        }
     });
 }
 init();

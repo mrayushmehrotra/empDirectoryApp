@@ -13,10 +13,10 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.seedDatabase = void 0;
-const dbSchema_1 = require("./dbSchema");
 const employeeValidation_1 = require("../validations/employeeValidation");
 const dbConnection_1 = require("./dbConnection");
 const dotenv_1 = __importDefault(require("dotenv"));
+const dbOperations_1 = require("./dbOperations");
 // Load environment variables
 dotenv_1.default.config();
 const demoData = {
@@ -32,6 +32,14 @@ const demoData = {
         {
             name: "Sales",
             floor: 1
+        },
+        {
+            name: "Human Resources",
+            floor: 4
+        },
+        {
+            name: "Finance",
+            floor: 5
         }
     ],
     employees: [
@@ -60,6 +68,18 @@ const demoData = {
             department: "Sales"
         },
         {
+            name: "david_brown",
+            position: "HR Specialist",
+            salary: 70000,
+            department: "Human Resources"
+        },
+        {
+            name: "lisa_davis",
+            position: "Financial Analyst",
+            salary: 80000,
+            department: "Finance"
+        },
+        {
             name: "alex_chen",
             position: "Backend Developer",
             salary: 90000,
@@ -76,6 +96,18 @@ const demoData = {
             position: "Sales Manager",
             salary: 85000,
             department: "Sales"
+        },
+        {
+            name: "rachel_green",
+            position: "HR Manager",
+            salary: 90000,
+            department: "Human Resources"
+        },
+        {
+            name: "james_wilson",
+            position: "Finance Manager",
+            salary: 95000,
+            department: "Finance"
         }
     ]
 };
@@ -90,9 +122,12 @@ const seedDatabase = () => __awaiter(void 0, void 0, void 0, function* () {
         console.log("🔌 Connecting to database...");
         yield (0, dbConnection_1.connectDB)(databaseUrl);
         console.log("✅ Database connected successfully");
+        // Get database operation instances
+        const Employee = (0, dbOperations_1.getEmployee)();
+        const Department = (0, dbOperations_1.getDepartment)();
         // Clear existing data
-        yield dbSchema_1.Employee.deleteMany({});
-        yield dbSchema_1.Department.deleteMany({});
+        yield Employee.deleteMany({});
+        yield Department.deleteMany({});
         console.log("🗑️  Cleared existing data");
         // Validate and create departments
         const validatedDepartments = [];
@@ -108,7 +143,12 @@ const seedDatabase = () => __awaiter(void 0, void 0, void 0, function* () {
         if (validatedDepartments.length === 0) {
             throw new Error("No valid departments found after validation");
         }
-        const createdDepartments = yield dbSchema_1.Department.insertMany(validatedDepartments);
+        // Ensure floor is always a number for TypeScript
+        const departmentsWithFloor = validatedDepartments.map(dept => ({
+            name: dept.name,
+            floor: dept.floor || 1
+        }));
+        const createdDepartments = yield Department.insertMany(departmentsWithFloor);
         console.log(`✅ Created ${createdDepartments.length} departments`);
         // Validate and create employees
         const employeePromises = demoData.employees.map((empData) => __awaiter(void 0, void 0, void 0, function* () {
@@ -119,24 +159,19 @@ const seedDatabase = () => __awaiter(void 0, void 0, void 0, function* () {
                 return null;
             }
             const validatedEmpData = validation.data;
-            const department = createdDepartments.find((dept) => dept.name === validatedEmpData.department);
-            if (!department) {
-                console.error(`❌ Department ${validatedEmpData.department} not found for employee ${validatedEmpData.name}`);
-                return null;
-            }
             // Check if employee name already exists (shouldn't happen in seeding, but good practice)
-            const existingEmployee = yield dbSchema_1.Employee.findOne({ name: validatedEmpData.name });
+            const existingEmployee = yield Employee.findByName(validatedEmpData.name);
             if (existingEmployee) {
                 console.error(`❌ Employee with name '${validatedEmpData.name}' already exists, skipping`);
                 return null;
             }
-            const employee = new dbSchema_1.Employee({
+            const employee = yield Employee.create({
                 name: validatedEmpData.name,
                 position: validatedEmpData.position,
                 salary: validatedEmpData.salary,
                 department: validatedEmpData.department
             });
-            return employee.save();
+            return employee;
         }));
         const createdEmployees = (yield Promise.all(employeePromises)).filter(Boolean);
         console.log(`✅ Created ${createdEmployees.length} employees`);

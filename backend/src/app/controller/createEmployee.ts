@@ -1,4 +1,4 @@
-import { Employee, Department } from "../../db/dbSchema";
+import { getEmployee } from "../../db/dbOperations";
 import { createEmployeeInputSchema, formatZodError } from "../../validations/employeeValidation";
 
 interface CreateEmployeeInput {
@@ -25,21 +25,21 @@ export const createEmployee = async (_: any, { input }: ResolverArgs) => {
 
     const validatedInput = validationResult.data.input;
 
+    const Employee = getEmployee();
+
     // Check if employee name already exists
-    const existingEmployee = await Employee.findOne({ name: validatedInput.name });
+    const existingEmployee = await Employee.findByName(validatedInput.name);
     if (existingEmployee) {
       throw new Error(`Employee with name '${validatedInput.name}' already exists, name must be unique`);
     }
 
     // Create the employee with the department enum value
-    const employee = new Employee({
+    const employee = await Employee.create({
       name: validatedInput.name,
       position: validatedInput.position,
       salary: validatedInput.salary,
       department: validatedInput.department
     });
-
-    await employee.save();
 
     // Return the employee
     return {
@@ -48,7 +48,7 @@ export const createEmployee = async (_: any, { input }: ResolverArgs) => {
       position: employee.position,
       salary: employee.salary.toString(),
       department: employee.department,
-      departmentId: employee._id // Since department is now a string, we'll use employee ID as departmentId
+      departmentId: employee._id
     };
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';

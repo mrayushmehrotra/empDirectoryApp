@@ -19,6 +19,8 @@ departmentId: ID!
 
 type Query {
 Employee: [Employee]
+getEmployeeDetails(id: ID!): Employee
+getEmployeesByDepartment(department: String!): [Employee]
 }
 
 type Mutation {

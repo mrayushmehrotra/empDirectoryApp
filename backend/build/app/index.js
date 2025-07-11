@@ -21,6 +21,8 @@ const jwt_1 = __importDefault(require("../services/jwt"));
 const schema_1 = require("./graphql/schema");
 const getAllEmployee_1 = require("./controller/getAllEmployee");
 const createEmployee_1 = require("./controller/createEmployee");
+const getEmployeeDetails_1 = require("./controller/getEmployeeDetails");
+const getEmployeesByDepartment_1 = require("./controller/getEmployeesByDepartment");
 function initServer() {
     return __awaiter(this, void 0, void 0, function* () {
         const app = (0, express_1.default)();
@@ -31,6 +33,8 @@ function initServer() {
             resolvers: {
                 Query: {
                     Employee: getAllEmployee_1.getAllEmp,
+                    getEmployeeDetails: getEmployeeDetails_1.getEmployeeDetails,
+                    getEmployeesByDepartment: getEmployeesByDepartment_1.getEmployeesByDepartment,
                 },
                 Mutation: {
                     createEmployee: createEmployee_1.createEmployee,

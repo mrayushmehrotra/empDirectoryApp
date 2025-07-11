@@ -8,17 +8,22 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.connectDB = void 0;
-const mongoose_1 = __importDefault(require("mongoose"));
+exports.isConnected = exports.getDB = exports.connectDB = void 0;
+const mongodb_1 = require("mongodb");
+let db = null;
+let client = null;
 const connectDB = (input) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const connection = yield mongoose_1.default.connect(input);
-        console.log(`Connected to ${connection.connection.name}`);
-        return connection;
+        if (client) {
+            console.log("Database already connected");
+            return client;
+        }
+        client = new mongodb_1.MongoClient(input);
+        yield client.connect();
+        db = client.db();
+        console.log(`Connected to ${db.databaseName}`);
+        return client;
     }
     catch (error) {
         console.error("Database connection failed:", error);
@@ -26,3 +31,14 @@ const connectDB = (input) => __awaiter(void 0, void 0, void 0, function* () {
     }
 });
 exports.connectDB = connectDB;
+const getDB = () => {
+    if (!db) {
+        throw new Error("Database not connected. Call connectDB first.");
+    }
+    return db;
+};
+exports.getDB = getDB;
+const isConnected = () => {
+    return db !== null;
+};
+exports.isConnected = isConnected;

@@ -10,9 +10,17 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getAllEmp = void 0;
-const dbSchema_1 = require("../../db/dbSchema");
+const dbOperations_1 = require("../../db/dbOperations");
 const getAllEmp = () => __awaiter(void 0, void 0, void 0, function* () {
-    const Users = yield dbSchema_1.Employee.find({});
-    return Users;
+    const Employee = (0, dbOperations_1.getEmployee)();
+    const users = yield Employee.findMany();
+    return users.map(user => ({
+        id: user._id,
+        name: user.name,
+        position: user.position,
+        salary: user.salary.toString(),
+        department: user.department,
+        departmentId: user._id
+    }));
 });
 exports.getAllEmp = getAllEmp;

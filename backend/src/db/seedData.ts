@@ -1,7 +1,8 @@
-import { Employee, Department } from "./dbSchema";
 import { employeeSchema, departmentSchema, formatZodError } from "../validations/employeeValidation";
 import { connectDB } from "./dbConnection";
 import dotenv from "dotenv";
+import { getEmployee, getDepartment } from "./dbOperations";
+
 
 // Load environment variables
 dotenv.config();
@@ -19,6 +20,14 @@ const demoData = {
     {
       name: "Sales",
       floor: 1
+    },
+    {
+      name: "Human Resources",
+      floor: 4
+    },
+    {
+      name: "Finance",
+      floor: 5
     }
   ],
   employees: [
@@ -47,6 +56,18 @@ const demoData = {
       department: "Sales"
     },
     {
+      name: "david_brown",
+      position: "HR Specialist",
+      salary: 70000,
+      department: "Human Resources"
+    },
+    {
+      name: "lisa_davis",
+      position: "Financial Analyst",
+      salary: 80000,
+      department: "Finance"
+    },
+    {
       name: "alex_chen",
       position: "Backend Developer",
       salary: 90000,
@@ -63,6 +84,18 @@ const demoData = {
       position: "Sales Manager",
       salary: 85000,
       department: "Sales"
+    },
+    {
+      name: "rachel_green",
+      position: "HR Manager",
+      salary: 90000,
+      department: "Human Resources"
+    },
+    {
+      name: "james_wilson",
+      position: "Finance Manager",
+      salary: 95000,
+      department: "Finance"
     }
   ]
 };
@@ -80,6 +113,11 @@ export const seedDatabase = async () => {
     console.log("🔌 Connecting to database...");
     await connectDB(databaseUrl);
     console.log("✅ Database connected successfully");
+
+    // Get database operation instances
+
+    const Employee = getEmployee();
+    const Department = getDepartment();
 
     // Clear existing data
     await Employee.deleteMany({});
@@ -102,7 +140,13 @@ export const seedDatabase = async () => {
       throw new Error("No valid departments found after validation");
     }
 
-    const createdDepartments = await Department.insertMany(validatedDepartments);
+    // Ensure floor is always a number for TypeScript
+    const departmentsWithFloor = validatedDepartments.map(dept => ({
+      name: dept.name,
+      floor: dept.floor || 1
+    }));
+
+    const createdDepartments = await Department.insertMany(departmentsWithFloor);
     console.log(`✅ Created ${createdDepartments.length} departments`);
 
     // Validate and create employees
@@ -115,28 +159,22 @@ export const seedDatabase = async () => {
       }
 
       const validatedEmpData = validation.data;
-      const department = createdDepartments.find((dept: any) => dept.name === validatedEmpData.department);
-      
-      if (!department) {
-        console.error(`❌ Department ${validatedEmpData.department} not found for employee ${validatedEmpData.name}`);
-        return null;
-      }
 
       // Check if employee name already exists (shouldn't happen in seeding, but good practice)
-      const existingEmployee = await Employee.findOne({ name: validatedEmpData.name });
+      const existingEmployee = await Employee.findByName(validatedEmpData.name);
       if (existingEmployee) {
         console.error(`❌ Employee with name '${validatedEmpData.name}' already exists, skipping`);
         return null;
       }
 
-      const employee = new Employee({
+      const employee = await Employee.create({
         name: validatedEmpData.name,
         position: validatedEmpData.position,
         salary: validatedEmpData.salary,
         department: validatedEmpData.department
       });
 
-      return employee.save();
+      return employee;
     });
 
     const createdEmployees = (await Promise.all(employeePromises)).filter(Boolean);
