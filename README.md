@@ -47,7 +47,14 @@ A full-stack employee directory built with Node.js, Apollo GraphQL, MongoDB, and
 
 ## ⚡ Quick Start (with Docker Compose)
 
-1. **Build and start all services:**
+0. **Run the Server on Linux:**
+   ```sh
+   chmod +x run.sh
+   ./run.sh
+   ```
+
+
+1. **Build and start all services with docker:**
    ```sh
    docker-compose up --build
    ```
