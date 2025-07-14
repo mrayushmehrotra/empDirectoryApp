@@ -1,5 +1,6 @@
 #!/bin/bash
 
+echo "starting the app..."
 # Start backend
 cd backend
 npm install
